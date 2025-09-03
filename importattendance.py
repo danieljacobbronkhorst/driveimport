@@ -39,7 +39,7 @@ chrome_options.add_argument("--ignore-certificate-errors")
 chrome_options.add_argument("--allow-insecure-localhost")
 
 
-driver = webdriver.Chrome(service=service, options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
 
 driver.save_screenshot("screenshot.png")
 
@@ -232,3 +232,4 @@ if failed_entries:
 # CLOSE DRIVER
 # ----------------------------
 driver.quit()
+
