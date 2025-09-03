@@ -6,9 +6,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import pandas as pd
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
 import pandas as pd
 import os
 import json
@@ -38,12 +35,9 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-software-rasterizer")
-chrome_options.binary_location = "/usr/bin/chromium-browser"  # Ubuntu path
 chrome_options.add_argument("--ignore-certificate-errors")
 chrome_options.add_argument("--allow-insecure-localhost")
 
-# Explicit Service
-service = Service("/usr/bin/chromedriver")  # Ubuntu path
 
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
