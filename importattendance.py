@@ -1,4 +1,6 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -29,9 +31,14 @@ DRIVE_FOLDER_ID = "1dMHZu4U0HmQBYynKHmIpL9mTzZ76csht"
 # ----------------------------
 # SELENIUM SETUP
 # ----------------------------
-options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
-driver = webdriver.Chrome(options=options)
+chrome_options = Options()
+chrome_options.add_argument("--headless=new")   # headless mode
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--window-size=1920,1080")
+
+driver = webdriver.Chrome(options=chrome_options)
 
 # ----------------------------
 # READ CSV
