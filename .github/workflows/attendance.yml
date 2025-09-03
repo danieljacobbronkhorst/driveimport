@@ -31,9 +31,10 @@ jobs:
         uses: browser-actions/setup-chrome@v2
 
       - name: Set up ChromeDriver
-        uses: nanasess/setup-chromedriver@v1
+        uses: webfactory/setup-chromedriver@v2
         with:
-          chromedriver-version: latest
+          version: latest
+            
       - name: Run CSV Drive Bot
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
@@ -55,4 +56,5 @@ jobs:
         with:
           name: selenium-screenshots
           path: "screenshot*.png"
+
 
