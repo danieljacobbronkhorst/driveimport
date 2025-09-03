@@ -48,6 +48,7 @@ chrome_options.add_argument("--disable-extensions")
 chrome_options.add_argument("--disable-popup-blocking")
 chrome_options.add_argument("--disable-notifications")
 chrome_options.add_argument("--disable-default-apps")
+chrome_options.add_argument("--disable-web-security")
 chrome_options.add_argument("--disable-infobars")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-browser-side-navigation")
@@ -337,6 +338,7 @@ if failed_entries:
 # CLOSE DRIVER
 # ----------------------------
 driver.quit()
+
 
 
 
