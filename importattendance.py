@@ -32,7 +32,7 @@ DRIVE_FOLDER_ID = "1dMHZu4U0HmQBYynKHmIpL9mTzZ76csht"
 # SELENIUM SETUP
 # ----------------------------
 chrome_options = Options()
-#chrome_options.add_argument("--headless=new")   # headless mode
+chrome_options.add_argument("--headless=new")   # headless mode
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
@@ -45,6 +45,7 @@ service = Service("/usr/bin/chromedriver")  # Ubuntu path
 
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
+driver.save_screenshot("screenshot.png")
 
 # ----------------------------
 # READ CSV
@@ -88,12 +89,16 @@ def check_in_member(number, family_rows, is_single):
                 submit_btn2 = driver.find_element(By.XPATH, "(//button[contains(text(),'Submit')])[last()]")
                 submit_btn2.click()
             except:
+                timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+                driver.save_screenshot(f"screenshot_{timestamp}.png")
                 pass
         print(f"✅ Checked in successfully with number {number}")
         time.sleep(2)
         return True
 
     except:
+        timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        driver.save_screenshot(f"screenshot_{timestamp}.png")
         try:
             # Check for family selection page
             family_members = WebDriverWait(driver, 10).until(
@@ -112,6 +117,8 @@ def check_in_member(number, family_rows, is_single):
                             button.click()
                             print(f"   ✅ Selected {member.text.strip()}")
                         except:
+                            timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+                            driver.save_screenshot(f"screenshot_{timestamp}.png")
                             print(f"   ⚠️ Could not select {member.text.strip()}")
                     else:
                         print(f"   ⏩ Skipping {member.text.strip()} (not in CSV family)")
@@ -128,10 +135,14 @@ def check_in_member(number, family_rows, is_single):
                 )
                 print(f"✅ Family checked in successfully with number {number}")
             except:
+                timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+                driver.save_screenshot(f"screenshot_{timestamp}.png")
                 print(f"⚠️ Family submission clicked but no confirmation detected for number {number}")
                 return False
 
         except:
+            timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+            driver.save_screenshot(f"screenshot_{timestamp}.png")
             if is_single:
                 # Visitor / unknown for single member
                 try:
@@ -152,6 +163,8 @@ def check_in_member(number, family_rows, is_single):
                     return True
 
                 except:
+                    timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+                    driver.save_screenshot(f"screenshot_{timestamp}.png")
                     print(f"⚠️ Single-member {number} failed to check in.")
                     return False
             else:
