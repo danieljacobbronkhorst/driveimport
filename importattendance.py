@@ -73,7 +73,7 @@ def check_in_member(number, family_rows, is_single):
        Returns True if successful, False if needs next try."""
     try:
         driver.get(URL)
-        input_box = WebDriverWait(driver, 10).until(
+        input_box = WebDriverWait(driver, 4).until(
             EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Personal Number']"))
         )
         input_box.clear()
@@ -83,7 +83,7 @@ def check_in_member(number, family_rows, is_single):
         submit_btn.click()
 
         # Single member success
-        thank_you = WebDriverWait(driver, 10).until(
+        thank_you = WebDriverWait(driver, 4).until(
             EC.presence_of_element_located((By.XPATH, "//div[contains(text(),'Thank you for checking in')]"))
         )
         if is_single:
@@ -103,7 +103,7 @@ def check_in_member(number, family_rows, is_single):
         driver.save_screenshot(f"screenshot_{timestamp}.png")
         try:
             # Check for family selection page
-            family_members = WebDriverWait(driver, 10).until(
+            family_members = WebDriverWait(driver, 4).until(
                 EC.presence_of_all_elements_located(
                     (By.XPATH,
                      "//div[contains(@class,'group-item')]//div[contains(@class,'Text') and not(contains(text(),'Already a Member')) "
@@ -124,7 +124,7 @@ def check_in_member(number, family_rows, is_single):
                             print(f"   ⚠️ Could not select {member.text.strip()}")
                     else:
                         print(f"   ⏩ Skipping {member.text.strip()} (not in CSV family)")
-                family_submit_btn = WebDriverWait(driver, 8).until(
+                family_submit_btn = WebDriverWait(driver, 4).until(
                     EC.element_to_be_clickable((By.XPATH, "(//button[contains(text(),'Submit')])[last()]"))
                 )
                 family_submit_btn.click()
@@ -132,7 +132,7 @@ def check_in_member(number, family_rows, is_single):
                 time.sleep(1)
                 return True
             try:
-                thank_you = WebDriverWait(driver, 8).until(
+                thank_you = WebDriverWait(driver, 4).until(
                     EC.presence_of_element_located((By.XPATH, "//div[contains(text(),'Thank you for checking in')]"))
                 )
                 print(f"✅ Family checked in successfully with number {number}")
@@ -148,15 +148,15 @@ def check_in_member(number, family_rows, is_single):
             if is_single:
                 # Visitor / unknown for single member
                 try:
-                    visiting_option = WebDriverWait(driver, 10).until(
+                    visiting_option = WebDriverWait(driver, 4).until(
                         EC.presence_of_element_located((By.XPATH, "//div[contains(text(),'Visiting')]"))
                     )
                     visiting_option.click()
-                    name_input = WebDriverWait(driver, 8).until(
+                    name_input = WebDriverWait(driver, 4).until(
                         EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Full names']"))
                     )
                     name_input.send_keys(family_rows.iloc[0]['Name'])
-                    visitor_submit_btn = WebDriverWait(driver, 8).until(
+                    visitor_submit_btn = WebDriverWait(driver, 4).until(
                         EC.element_to_be_clickable((By.XPATH, "(//button[contains(text(),'Submit')])[last()]"))
                     )
                     visitor_submit_btn.click()
