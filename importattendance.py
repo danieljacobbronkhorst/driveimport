@@ -39,6 +39,8 @@ chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-software-rasterizer")
 chrome_options.binary_location = "/usr/bin/chromium-browser"  # Ubuntu path
+chrome_options.add_argument("--ignore-certificate-errors")
+chrome_options.add_argument("--allow-insecure-localhost")
 
 # Explicit Service
 service = Service("/usr/bin/chromedriver")  # Ubuntu path
