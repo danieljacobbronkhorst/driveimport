@@ -31,7 +31,7 @@ jobs:
         uses: browser-actions/setup-chrome@v2
 
       - name: Set up ChromeDriver
-        uses: webfactory/setup-chromedriver@v2
+        uses: browser-actions/setup-chromedriver@v1
         with:
           version: latest
             
@@ -56,6 +56,7 @@ jobs:
         with:
           name: selenium-screenshots
           path: "screenshot*.png"
+
 
 
 
