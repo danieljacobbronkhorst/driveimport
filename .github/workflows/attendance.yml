@@ -27,39 +27,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Chrome and ChromeDriver
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip gnupg
-          
-          # Install Google Chrome
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable || true  # Continue even if post-install scripts fail
-          
-          # Get Chrome version and install matching ChromeDriver
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f1)
-          echo "Chrome version: $CHROME_VERSION"
-          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          echo "ChromeDriver version: $DRIVER_VERSION"
-          wget -q "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
-          unzip -q chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
-          
-          # Verify installations
-          echo "Chrome version: $(google-chrome --version || echo 'Chrome not found')"
-          echo "ChromeDriver version: $(chromedriver --version || echo 'ChromeDriver not found')"
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v2
 
+      - name: Set up ChromeDriver
+        uses: nanasess/setup-chromedriver@v1
+        with:
+          chromedriver-version: latest
       - name: Run CSV Drive Bot
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: python csvdrivebot.py
 
       - name: Run Import Attendance
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: python importattendance.py
 
       - name: Upload failed entries CSV
@@ -75,3 +55,4 @@ jobs:
         with:
           name: selenium-screenshots
           path: "screenshot*.png"
+
