@@ -1,6 +1,7 @@
 name: Import Attendance
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '59 11 * * 0'   # Sunday 11:59
     - cron: '0 14 * * 0'    # Sunday 14:00
