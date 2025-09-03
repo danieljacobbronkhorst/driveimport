@@ -27,26 +27,36 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@v2
-
-      - name: Set up ChromeDriver manually
+      - name: Install Chrome and ChromeDriver
         run: |
-          # Get major Chrome version
+          # Install Chrome from official Google repository
+          sudo apt-get update
+          sudo apt-get install -y wget unzip gnupg
+          
+          # Add Google Chrome repository (modern method)
+          sudo mkdir -p /etc/apt/keyrings
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg
+          echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          
+          # Install Chrome
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          
+          # Get Chrome version and install matching ChromeDriver
           CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f1)
-          echo "Detected Chrome version: $CHROME_VERSION"
-          
-          # Get matching ChromeDriver version
+          echo "Chrome version: $CHROME_VERSION"
           DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          echo "Installing ChromeDriver version: $DRIVER_VERSION"
+          echo "ChromeDriver version: $DRIVER_VERSION"
           
-          # Download, unzip, and move to PATH
           wget -q "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
           unzip -q chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
           
-          # Verify installation
+          # Verify installations
+          echo "Chrome location: $(which google-chrome)"
+          echo "ChromeDriver location: $(which chromedriver)"
+          google-chrome --version
           chromedriver --version
             
       - name: Run CSV Drive Bot
@@ -70,6 +80,7 @@ jobs:
         with:
           name: selenium-screenshots
           path: "screenshot*.png"
+
 
 
 
