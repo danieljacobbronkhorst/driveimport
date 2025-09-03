@@ -27,6 +27,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser chromium-chromedriver
           pip install -r requirements.txt
+          
+      - name: Upload screenshot if exists
+        if: always()  # run even if previous steps fail
+        uses: actions/upload-artifact@v3
+        with:
+          name: selenium-screenshot
+          path: screenshot.png
 
       - name: Run CSV Drive Bot
         env:
