@@ -5,6 +5,7 @@ import pandas as pd
 from googleapiclient.http import MediaIoBaseDownload
 import os
 import glob
+import json
 
 # ----------------------------
 # LOCAL SAVE CONFIG
@@ -18,18 +19,28 @@ LOCAL_FILE_PATH = os.path.join(LOCAL_FOLDER, LOCAL_FILE_NAME)
 # ----------------------------
 # CONFIG
 # ----------------------------
-SERVICE_ACCOUNT_FILE = os.path.join(SCRIPT_DIR, 'service_account.json')
 FOLDER_ID = '1Oi_udzlWD1fEx7U5_kdu2kJZfkRrXsMK'
 FILE_PREFIX = 'export_'
 
 # ----------------------------
 # AUTHENTICATION
 # ----------------------------
+#SERVICE_ACCOUNT_FILE = os.path.join(SCRIPT_DIR, 'service_account.json')
+#SCOPES = ['https://www.googleapis.com/auth/drive']
+#credentials = service_account.Credentials.from_service_account_file(
+#    SERVICE_ACCOUNT_FILE, scopes=SCOPES
+#)
+#drive_service = build('drive', 'v3', credentials=credentials)
+
 SCOPES = ['https://www.googleapis.com/auth/drive']
-credentials = service_account.Credentials.from_service_account_file(
-    SERVICE_ACCOUNT_FILE, scopes=SCOPES
-)
+
+# Read JSON from GitHub Secret
+creds_json = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+creds_dict = json.loads(creds_json)
+credentials = service_account.Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 drive_service = build('drive', 'v3', credentials=credentials)
+
+
 
 # ----------------------------
 # GET ALL FILES IN FOLDER
