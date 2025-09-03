@@ -30,10 +30,24 @@ jobs:
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@v2
 
-      - name: Set up ChromeDriver
-        uses: browser-actions/setup-chromedriver@v1
-        with:
-          version: latest
+      - name: Set up ChromeDriver manually
+        run: |
+          # Get major Chrome version
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f1)
+          echo "Detected Chrome version: $CHROME_VERSION"
+          
+          # Get matching ChromeDriver version
+          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          echo "Installing ChromeDriver version: $DRIVER_VERSION"
+          
+          # Download, unzip, and move to PATH
+          wget -q "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
+          unzip -q chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/
+          
+          # Verify installation
+          chromedriver --version
             
       - name: Run CSV Drive Bot
         env:
@@ -56,6 +70,7 @@ jobs:
         with:
           name: selenium-screenshots
           path: "screenshot*.png"
+
 
 
 
