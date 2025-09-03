@@ -4,11 +4,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 import time
-import pandas as pd
 import pandas as pd
 import os
 import json
+import random
 
 # ----------------------------
 # CONFIG
@@ -17,29 +19,54 @@ URL = "https://click.ledeinchristus.com/checkin?cong=Centurion"
 VISITOR_NAME = "Toets Import"
 UNKNOWN_NAME = "Unknown"
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))  # folder of the running script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOCAL_FOLDER = os.path.join(SCRIPT_DIR, "Download")
 os.makedirs(LOCAL_FOLDER, exist_ok=True)
 FAILED_LOG_PATH = LOCAL_FOLDER
 CSV_PATH = os.path.join(LOCAL_FOLDER, "export_attendance.csv")
 
 # ----------------------------
-# SELENIUM SETUP
+# SELENIUM SETUP - ANTI DETECTION
 # ----------------------------
 chrome_options = Options()
+
+# Basic headless options
 chrome_options.add_argument("--headless=new")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-software-rasterizer")
-chrome_options.add_argument("--ignore-certificate-errors")
-chrome_options.add_argument("--allow-insecure-localhost")
-chrome_options.add_argument("--disable-extensions")
-chrome_options.add_argument("--disable-web-security")
-chrome_options.add_argument("--remote-debugging-port=9222")
 
-# Try to find Chrome binary in common locations
+# Anti-detection options
+chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+chrome_options.add_experimental_option('useAutomationExtension', False)
+chrome_options.add_argument("--disable-web-security")
+chrome_options.add_argument("--allow-running-insecure-content")
+chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--disable-popup-blocking")
+chrome_options.add_argument("--disable-notifications")
+chrome_options.add_argument("--disable-default-apps")
+chrome_options.add_argument("--disable-infobars")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--disable-browser-side-navigation")
+chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+chrome_options.add_argument("--disable-background-timer-throttling")
+chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+chrome_options.add_argument("--disable-renderer-backgrounding")
+chrome_options.add_argument("--disable-ipc-flooding-protection")
+chrome_options.add_argument("--enable-features=NetworkService,NetworkServiceInProcess")
+
+# Random user agent
+user_agents = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+]
+chrome_options.add_argument(f"--user-agent={random.choice(user_agents)}")
+
+# Try to find Chrome binary
 chrome_binary_locations = [
     "/usr/bin/google-chrome",
     "/usr/bin/google-chrome-stable",
@@ -55,7 +82,7 @@ for location in chrome_binary_locations:
 else:
     print("Warning: Chrome binary not found in common locations")
 
-# Try to find chromedriver in common locations
+# Try to find chromedriver
 chromedriver_locations = [
     "/usr/local/bin/chromedriver",
     "/usr/bin/chromedriver",
@@ -74,6 +101,13 @@ else:
 
 try:
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+    # Additional anti-detection measures
+    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+        "userAgent": driver.execute_script("return navigator.userAgent;").replace("Headless", "")
+    })
+    
     print("Chrome driver initialized successfully")
 except Exception as e:
     print(f"Failed to initialize Chrome driver: {e}")
@@ -98,19 +132,54 @@ failed_entries = []
 # ----------------------------
 # HELPER FUNCTION
 # ----------------------------
+def human_like_delay():
+    """Add random human-like delays"""
+    time.sleep(random.uniform(0.5, 2.0))
+
+def human_like_type(element, text):
+    """Type like a human with random delays"""
+    for char in text:
+        element.send_keys(char)
+        time.sleep(random.uniform(0.05, 0.2))
+
 def check_in_member(number, family_rows, is_single):
     """Attempts check-in for one member.
        Returns True if successful, False if needs next try."""
     try:
+        print(f"Attempting check-in for number: {number}")
         driver.get(URL)
+        human_like_delay()
+         # Wait for page to load completely
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+
+        # Check for Cloudflare challenge
+        if "challenge" in driver.page_source.lower() or "cloudflare" in driver.page_source.lower():
+            print("⚠️ Cloudflare challenge detected, waiting...")
+            time.sleep(10)  # Wait for potential challenge to resolve
+            driver.save_screenshot("cloudflare_challenge.png")
+
+        
         input_box = WebDriverWait(driver, 4).until(
             EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Personal Number']"))
         )
+
+        # Human-like interaction with input
+        ActionChains(driver).move_to_element(input_box).click().perform()
+        human_like_delay()
         input_box.clear()
+        human_like_delay()
+        
         if number:
-            input_box.send_keys(number)
-        submit_btn = driver.find_element(By.XPATH, "//button[contains(text(),'Submit')]")
-        submit_btn.click()
+            human_like_type(input_box, number)
+        human_like_delay()
+        # Find and click submit button
+        submit_btn = WebDriverWait(driver, 15).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Submit')]"))
+        )
+        ActionChains(driver).move_to_element(submit_btn).click().perform()
+        human_like_delay()
 
         # Single member success
         thank_you = WebDriverWait(driver, 4).until(
@@ -268,6 +337,7 @@ if failed_entries:
 # CLOSE DRIVER
 # ----------------------------
 driver.quit()
+
 
 
 
