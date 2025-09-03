@@ -1,0 +1,32 @@
+name: Import Attendance
+
+on:
+  schedule:
+    - cron: '59 11 * * 0'   # Sunday 11:59
+    - cron: '0 14 * * 0'    # Sunday 14:00
+    - cron: '0 18 * * 0'    # Sunday 18:00
+    - cron: '0 20 * * 0'    # Sunday 20:00
+
+jobs:
+  run-attendance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run CSV Drive Bot
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: python csvdrivebot.py
+
+      - name: Run Import Attendance
+        run: python importattendance.py
