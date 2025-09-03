@@ -28,12 +28,6 @@ jobs:
           sudo apt-get install -y chromium-browser chromium-chromedriver
           pip install -r requirements.txt
           
-      - name: Upload screenshot if exists
-        if: always()  # run even if previous steps fail
-        uses: actions/upload-artifact@v3
-        with:
-          name: selenium-screenshot
-          path: screenshot.png
 
       - name: Run CSV Drive Bot
         env:
@@ -43,5 +37,19 @@ jobs:
       - name: Run Import Attendance
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-
         run: python importattendance.py
+
+      - name: Upload failed entries CSV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-entries
+          path: failed_entries*.csv
+
+      - name: Upload Selenium screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-screenshots
+          path: "*.png"
+
