@@ -231,37 +231,8 @@ if failed_entries:
     failed_df = pd.DataFrame(failed_entries)
     local_file = os.path.join(SCRIPT_DIR, f"failed_entries_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv")
     failed_df.to_csv(local_file, index=False)
-    
-    
-    #SERVICE_ACCOUNT_FILE = os.path.join(SCRIPT_DIR, "service_account.json")
 
-    # Authenticate to Google Drive
-    #credentials = service_account.Credentials.from_service_account_file(
-    #    SERVICE_ACCOUNT_FILE,
-    #    scopes=["https://www.googleapis.com/auth/drive"]
-    #    )
-    
-    # Read JSON from GitHub Secret
-    creds_json = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
-    creds_dict = json.loads(creds_json)
-    credentials = service_account.Credentials.from_service_account_info(
-        creds_dict,
-        scopes=["https://www.googleapis.com/auth/drive"]
-    )
-    service = build("drive", "v3", credentials=credentials)
-
-    # Upload file
-    file_metadata = {
-        "name": os.path.basename(local_file),
-        "parents": [DRIVE_FOLDER_ID]
-    }
-    media = MediaFileUpload(local_file, mimetype="text/csv")
-    uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-
-    print(f"✅ Failed entries uploaded to Google Drive with file ID: {uploaded_file['id']}")
-
-    # Delete local temp file
-    os.remove(local_file)
+    print(f"⚠️ Failed entries saved to {local_file}")
 
 # ----------------------------
 # CLOSE DRIVER
