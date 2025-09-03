@@ -33,6 +33,22 @@ jobs:
           sudo apt-get install -y chromium-browser chromium-chromedriver || \
           sudo apt-get install -y chromium chromium-driver
           
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          # Install Google Chrome
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+          # Install ChromeDriver
+          CHROME_VERSION=$(google-chrome --version | cut -d " " -f3 | cut -d "." -f1)
+          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
+          wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip -q chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+
+          
 
       - name: Run CSV Drive Bot
         env:
@@ -57,6 +73,7 @@ jobs:
         with:
           name: selenium-screenshots
           path: "*.png"
+
 
 
 
