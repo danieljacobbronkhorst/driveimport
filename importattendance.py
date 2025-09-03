@@ -43,6 +43,12 @@ driver = webdriver.Chrome(options=chrome_options)
 # ----------------------------
 # READ CSV
 # ----------------------------
+
+if not os.path.exists(CSV_PATH):
+    print(f"⚠️ CSV file not found at {CSV_PATH}, nothing to process.")
+    driver.quit()
+    exit(0)
+
 df = pd.read_csv(CSV_PATH)
 df['Number'] = df['Number'].astype(str).str.strip("'")  # remove quotes from numbers
 df['Family'] = df['Family'].fillna('')      # ensure no NaN family names
