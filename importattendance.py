@@ -22,14 +22,12 @@ LOCAL_FOLDER = os.path.join(SCRIPT_DIR, "Download")
 os.makedirs(LOCAL_FOLDER, exist_ok=True)
 FAILED_LOG_PATH = LOCAL_FOLDER
 CSV_PATH = os.path.join(LOCAL_FOLDER, "export_attendance.csv")
-DRIVE_FOLDER_ID = "1dMHZu4U0HmQBYynKHmIpL9mTzZ76csht"
-
 
 # ----------------------------
 # SELENIUM SETUP
 # ----------------------------
 chrome_options = Options()
-chrome_options.add_argument("--headless=new")   # headless mode
+chrome_options.add_argument("--headless=new")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
@@ -37,13 +35,49 @@ chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-software-rasterizer")
 chrome_options.add_argument("--ignore-certificate-errors")
 chrome_options.add_argument("--allow-insecure-localhost")
-chrome_options.binary_location = "/usr/bin/google-chrome"  
+chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--disable-web-security")
+chrome_options.add_argument("--remote-debugging-port=9222")
 
+# Try to find Chrome binary in common locations
+chrome_binary_locations = [
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/chromium-browser",
+    "/usr/bin/chromium"
+]
 
-service = Service("/usr/local/bin/chromedriver")
-driver = webdriver.Chrome(service=service, options=chrome_options)
+for location in chrome_binary_locations:
+    if os.path.exists(location):
+        chrome_options.binary_location = location
+        print(f"Using Chrome binary at: {location}")
+        break
+else:
+    print("Warning: Chrome binary not found in common locations")
 
-driver.save_screenshot("screenshot.png")
+# Try to find chromedriver in common locations
+chromedriver_locations = [
+    "/usr/local/bin/chromedriver",
+    "/usr/bin/chromedriver",
+    "/usr/lib/chromium-browser/chromedriver"
+]
+
+service = None
+for location in chromedriver_locations:
+    if os.path.exists(location):
+        service = Service(location)
+        print(f"Using ChromeDriver at: {location}")
+        break
+else:
+    print("Warning: ChromeDriver not found, trying default location")
+    service = Service()
+
+try:
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    print("Chrome driver initialized successfully")
+except Exception as e:
+    print(f"Failed to initialize Chrome driver: {e}")
+    exit(1)
 
 # ----------------------------
 # READ CSV
@@ -234,5 +268,6 @@ if failed_entries:
 # CLOSE DRIVER
 # ----------------------------
 driver.quit()
+
 
 
